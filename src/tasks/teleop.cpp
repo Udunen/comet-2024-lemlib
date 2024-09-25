@@ -17,9 +17,7 @@ static comets::EdgeDetector xDetector, yDetector;
 static comets::EdgeDetector l1Detector, upDetector;
 static comets::EdgeDetector lDetectorWing, rDetectorWing;
 
-void opcontrol_initialize()
-{
-}
+void opcontrol_initialize() {}
 
 /**
  * Runs the operator control code. This function will be started in its own task

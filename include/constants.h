@@ -5,7 +5,6 @@
 #include <map>
 #include "comets/vendor.h"
 #include "comets/types.h"
-#include "pros/motors.h"
 
 namespace constants
 {
@@ -25,7 +24,7 @@ namespace constants
             -8,
         };
 
-        inline constexpr double DRIVETRAIN_WIDTH = 11.64;
+        inline constexpr double DRIVETRAIN_WIDTH = 11.25;
         inline constexpr int8_t IMU_PORT = 5;
 
         inline constexpr auto CHASSIS_INTERNAL_GEARSET = pros::v5::MotorGears::blue;

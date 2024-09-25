@@ -17,7 +17,7 @@ pros::Controller controller (pros::E_CONTROLLER_MASTER);
 
 void autonomous() {
     drivebase->setPose({0, 0}, 0);
-    drivebase->turnToHeading(129, 100000);
+    drivebase->turnToHeading(90, 100000);
 
     // pros::lcd::clear();
     pros::delay(500);

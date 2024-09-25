@@ -37,23 +37,23 @@ lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel 1, set to null
 lemlib::ControllerSettings lateral_controller(0, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             0, // derivative gain (kD)
-                                            3, // anti windup
-                                            1, // small error range, in inches
-                                            100, // small error range timeout, in milliseconds
-                                            3, // large error range, in inches
-                                            500, // large error range timeout, in milliseconds
-                                            20 // maximum acceleration (slew)
+                                            0, //3, // anti windup
+                                            0, //1, // small error range, in inches
+                                            0, //100, // small error range timeout, in milliseconds
+                                            0, //3, // large error range, in inches
+                                            0, //500, // large error range timeout, in milliseconds
+                                            0 //20 // maximum acceleration (slew)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angular_controller(3, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(2.65, // proportional gain (kP)
                                             0, // integral gain (kI)
-                                            8, // derivative gain (kD)
-                                            0, //3, // anti windup
-                                            0, //1, // small error range, in degrees
-                                            0, //100, // small error range timeout, in milliseconds
-                                            0, //3, // large error range, in degrees
-                                            0, //500, // large error range timeout, in milliseconds
+                                            10, // derivative gain (kD)
+                                            0, // anti windup
+                                            1, // small error range, in degrees
+                                            100, // small error range timeout, in milliseconds
+                                            3, // large error range, in degrees
+                                            500, // large error range timeout, in milliseconds
                                             0 // maximum acceleration (slew)
 );
 
@@ -81,12 +81,24 @@ pros::IMU Drivebase::getIMU() {
     return imu;
 }
 
-void Drivebase::tankDrive(float left, float right) {
-    chassis.tank(left, right);
+void Drivebase::tankDrive(float left, float right, bool disableCurveDrive) {
+    chassis.tank(left, right, disableCurveDrive);
 }
 
-void Drivebase::arcadeDrive(float drive, float turn) {
-    chassis.arcade(drive, turn);
+void Drivebase::arcadeDrive(float drive, float turn, bool disableCurveDrive, float desaturateBias) {
+    chassis.arcade(drive, turn, disableCurveDrive, desaturateBias);
+}
+
+void Drivebase::errorDrive(float drive, float turn) {
+    drive /= 127.0;
+    turn /= 127.0;
+    if (drive < 0.5) {
+        turn /= 1.4;
+    } else {
+        turn /= 1.2;
+    }
+    m_groupl.move_voltage((drive + turn)*12000);
+    m_groupr.move_voltage((drive - turn)*12000);
 }
 
 void Drivebase::turnToHeading(float theta, int timeout, lemlib::TurnToHeadingParams params, bool async) {
@@ -157,14 +169,11 @@ void Drivebase::waitUntilDone() {
     chassis.waitUntilDone();
 }
 
-void Drivebase::errorDrive(float drive, float turn) {
-    drive /= 127.0;
-    turn /= 127.0;
-    if (drive < 0.5) {
-        turn /= 1.4;
-    } else {
-        turn /= 1.2;
-    }
-    m_groupl.move_voltage((drive + turn)*12000);
-    m_groupr.move_voltage((drive - turn)*12000);
+void Drivebase::waitUntilPercent(float endX, float endY, float percent) {
+    float startX = chassis.getPose().x;
+    float startY = chassis.getPose().y;
+    float xDist = endX - startX;
+    float yDist = endY - startY;
+    float dist = sqrt(xDist*xDist + yDist*yDist);
+    chassis.waitUntil(dist*percent);
 }
